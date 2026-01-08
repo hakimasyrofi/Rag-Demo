@@ -23,3 +23,18 @@ class RagController:
             }
         except Exception as e:
             raise HTTPException(status_code=500, detail=str(e))
+
+    @staticmethod
+    def add_document(req: DocumentRequest):
+        try:
+            emb = embedding_service.fake_embed(req.text)
+            doc_id = storage_service.add_document(req.text, emb)
+            return {"id": doc_id, "status": "added"}
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=str(e))
+
+    @staticmethod
+    def get_status():
+        base_status = storage_service.get_status()
+        base_status["graph_ready"] = rag_service.workflow is not None
+        return base_status
