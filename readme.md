@@ -1,78 +1,315 @@
-🧩 Code Quality Exercise 
+# How to Run the RAG Demo Application
 
-For Associate Software Engineer Candidates 
+This tutorial guides you through setting up and running the Learning RAG Demo application, a FastAPI-based Retrieval-Augmented Generation (RAG) service.
 
-Thank you for your interest in joining our team! As part of our technical evaluation, we invite you to review and refactor the small Python application in this repository. 
+## Prerequisites
 
-This exercise is designed to assess your understanding of code structure, maintainability, and software design fundamentals—not just whether the code runs. 
+Before you begin, ensure you have the following installed on your system:
 
-📌 The Task 
+- **Python 3.8+** — [Download here](https://www.python.org/downloads/)
+- **pip** (Python package manager) — Usually comes with Python
+- **Git** (optional, for version control)
 
-We’ve provided a working but intentionally unstructured implementation of a simple RAG (Retrieval-Augmented Generation) service using: 
+### Check Your Installations
 
-    FastAPI  
-    LangGraph  
-    Qdrant (with in-memory fallback)
-     
+Open a terminal (PowerShell, Command Prompt, or bash) and verify:
 
-Your goal:
-Refactor the code into a cleaner, more maintainable, and production-suitable structure using object-oriented principles and good software engineering practices. 
+```bash
+python --version
+pip --version
+```
 
-You are not expected to add new features, only to improve the internal design while preserving existing behavior. 
- 
-📁 What’s Included 
+You should see Python 3.8 or higher and pip installed.
 
-    main.py: A single-file implementation that works but contains common anti-patterns (e.g., global state, tight coupling, lack of separation of concerns).
-    This README.md: Instructions and context.
- 
-✅ What We’re Looking For 
+---
 
-We want to see how you think about code quality. In your refactored version, prioritize: 
+## Step 1: Clone or Download the Project
 
-    Encapsulation: Group related data and behavior together.
-    Separation of concerns: Split web logic, business logic, and data access.
-    Explicit dependencies: Avoid global variables; pass what you need.
-    Testability: Structure code so units can be validated in isolation.
-    Readability: Clear naming, logical structure, minimal surprise.
-     
+If you haven't already, download the project folder to your local machine:
 
-    💡 You don’t need to implement unit tests—but design the code so they could be added easily. 
-     
-🛠 How to Approach This 
+```bash
+cd path/to/your/projects
+git clone <repository-url>
+cd "Rag Demo"
+```
 
-    Understand the current behavior
-    Run the app, try the endpoints (/add, /ask), and confirm you know what it does. 
+Or simply navigate to your downloaded folder:
 
-    Identify key responsibilities   
-        Handling HTTP requests  
-        Managing document storage (Qdrant or fallback)  
-        Generating fake embeddings  
-        Executing the retrieval → answer workflow
+```bash
+cd c:\Users\UniPin\Downloads\Rag Demo
+```
 
-    Redesign around these responsibilities
-    Consider creating classes like: 
-        EmbeddingService
-        DocumentStore
-        RagWorkflow
-        API router or controller
+---
 
-    Refactor incrementally
-    Keep the same external API—only change the internal structure. 
+## Step 2: Set Up a Virtual Environment
 
- 
-📤 Submission Guidelines 
+Creating a virtual environment isolates this project's dependencies from other Python projects.
 
-Please provide: 
-    A refactored version of the code (you may split into multiple files)
-    A short notes.md (1–3 paragraphs) explaining:
-        Your main design decisions
-        One trade-off you considered
-        How your version improves maintainability
-         
+### On Windows (PowerShell or Command Prompt):
 
-Submit via github repo with public link.
- 
+```bash
+python -m venv venv
+venv\Scripts\Activate.ps1
+```
 
-Note: This is not a test of your knowledge of LangGraph or Qdrant—we’re evaluating how you organize code, manage dependencies, and apply basic OOP principles in a realistic context. 
-     
-Good luck—and we look forward to seeing your approach! 
+If using Command Prompt instead of PowerShell:
+
+```bash
+python -m venv venv
+venv\Scripts\activate.bat
+```
+
+### On macOS/Linux:
+
+```bash
+python -m venv venv
+source venv/bin/activate
+```
+
+You'll see `(venv)` appear in your terminal prompt when activated.
+
+---
+
+## Step 3: Install Dependencies
+
+The application requires several Python packages. Install them using pip:
+
+```bash
+pip install fastapi uvicorn langraph qdrant-client
+```
+
+**Alternatively**, if a `requirements.txt` file exists, install all dependencies at once:
+
+```bash
+pip install -r requirements.txt
+```
+
+---
+
+## Step 4: Configure Environment Variables (Optional)
+
+The application uses a Qdrant vector database. By default, it points to:
+
+```
+http://localhost:6333
+```
+
+If you have Qdrant running on a different host, set the environment variable:
+
+### Windows (PowerShell):
+
+```bash
+$env:QDRANT_URL = "http://your-qdrant-host:6333"
+```
+
+### Windows (Command Prompt):
+
+```bash
+set QDRANT_URL=http://your-qdrant-host:6333
+```
+
+### macOS/Linux:
+
+```bash
+export QDRANT_URL=http://your-qdrant-host:6333
+```
+
+If you don't set this, the application will fall back to in-memory storage.
+
+---
+
+## Step 5: Run the Application
+
+Start the FastAPI server with uvicorn:
+
+```bash
+python -m uvicorn src.main:app --reload --host 0.0.0.0 --port 8000
+```
+
+**Explanation of flags:**
+
+- `src.main:app` — Tells uvicorn where to find the FastAPI app instance
+- `--reload` — Automatically restarts the server when you make code changes (dev mode)
+- `--host 0.0.0.0` — Makes the API accessible from any network interface
+- `--port 8000` — Runs the server on port 8000
+
+You should see output like:
+
+```
+INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+INFO:     Application startup complete
+```
+
+---
+
+## Step 6: Test the API
+
+### Option A: Using the Interactive Docs (Recommended)
+
+Open your browser and navigate to:
+
+```
+http://localhost:8000/docs
+```
+
+This opens the **Swagger UI**, where you can test endpoints interactively.
+
+### Option B: Using cURL
+
+Add a document:
+
+```bash
+curl -X POST "http://localhost:8000/add" \
+  -H "Content-Type: application/json" \
+  -d '{"text": "FastAPI is a modern web framework for Python."}'
+```
+
+Ask a question:
+
+```bash
+curl -X POST "http://localhost:8000/ask" \
+  -H "Content-Type: application/json" \
+  -d '{"question": "What is FastAPI?"}'
+```
+
+Check status:
+
+```bash
+curl "http://localhost:8000/status"
+```
+
+### Option C: Using Python Requests
+
+Create a test script, e.g., `test_api.py`:
+
+```python
+import requests
+
+BASE_URL = "http://localhost:8000"
+
+# Add a document
+response = requests.post(f"{BASE_URL}/add", json={
+    "text": "Machine Learning is a subset of AI."
+})
+print("Add Document:", response.json())
+
+# Ask a question
+response = requests.post(f"{BASE_URL}/ask", json={
+    "question": "What is machine learning?"
+})
+print("Ask Question:", response.json())
+
+# Check status
+response = requests.get(f"{BASE_URL}/status")
+print("Status:", response.json())
+```
+
+Run it:
+
+```bash
+pip install requests
+python test_api.py
+```
+
+---
+
+## API Endpoints
+
+### POST `/add` — Add a Document
+
+**Request:**
+
+```json
+{
+  "text": "Your document text here"
+}
+```
+
+**Response:**
+
+```json
+{
+  "status": "success",
+  "id": "doc_123"
+}
+```
+
+### POST `/ask` — Ask a Question
+
+**Request:**
+
+```json
+{
+  "question": "Your question here"
+}
+```
+
+**Response:**
+
+```json
+{
+  "question": "Your question here",
+  "answer": "Generated answer based on stored documents"
+}
+```
+
+### GET `/status` — Check Application Status
+
+**Response:**
+
+```json
+{
+  "status": "running",
+  "documents_count": 5
+}
+```
+
+---
+
+## Stopping the Server
+
+To stop the application, press **CTRL+C** in the terminal where the server is running.
+
+---
+
+## Troubleshooting
+
+### Issue: `ModuleNotFoundError: No module named 'fastapi'`
+
+**Solution:** Ensure your virtual environment is activated and dependencies are installed:
+
+```bash
+# Activate venv
+venv\Scripts\Activate.ps1  # Windows PowerShell
+source venv/bin/activate   # macOS/Linux
+
+# Install dependencies
+pip install fastapi uvicorn langraph qdrant-client
+```
+
+### Issue: Port 8000 Already in Use
+
+**Solution:** Run on a different port:
+
+```bash
+python -m uvicorn src.main:app --reload --port 8001
+```
+
+Then access the app at `http://localhost:8001`.
+
+### Issue: Cannot Connect to Qdrant
+
+**Solution:** The application has a built-in fallback to in-memory storage. If you want to use Qdrant, ensure it's running:
+
+```bash
+# Using Docker (if you have Docker installed)
+docker run -d -p 6333:6333 qdrant/qdrant
+```
+
+---
+
+## Development Tips
+
+- **Auto-reload:** The `--reload` flag watches file changes and restarts the server automatically—great for development.
+- **Debug mode:** Add `print()` statements or use a debugger to inspect values.
+- **Logs:** Check the terminal output for detailed logs and error messages.
